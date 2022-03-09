@@ -1,5 +1,5 @@
 /* 
-    第一题代码(C++)
+    第四题Numerov代码(C++)
 */
 #include <iostream>
 #include <math.h>
@@ -44,7 +44,7 @@ int numerov(int Nx, double *X, double *PHI, double *V, double E, double dx, doub
     {
         PHI[i+1]= ((12 - 10*f[i])*PHI[i] - f[i-1]*PHI[i-1])/f[i+1];
     }
-     double c=1/pow(integral(Nx,PHI,dx),0.5);
+    double c=1/pow(integral(Nx,PHI,dx),0.5);
     for (int i=0;i<=Nx;i++)
     {
         PHI[i]=PHI[i]*c;
@@ -85,26 +85,27 @@ double bi_solve(int Nx, double *X, double *PHI, double *V, double E_low, double 
 int main()
 {   
     //parameter
-    int Nx=1e4;
+    int Nx=2e2;
      double E;
      double max_step=0.1;
-     double dx=1.0/Nx;
-     double eps=1e-8;
+     double dx=10.0/Nx;
+     double eps=1e-6;
     //init array
      double X[Nx+1];
      double PHI[Nx+1];
      double V[Nx+1];
     for (int i=0;i<=Nx;i++)
     {
-        X[i]=i*dx;
-        V[i]=0;
+        X[i]=i*dx-5;
+        V[i]=0.5*(((X[i]*X[i]-1)*(X[i]*X[i]-1)/4)-X[i]*X[i]);//调整V0
     }
 
+    
     //loop for E
-    int task=3;
+    int task=1;
     double data_E[task];
     double data_PHI[task][Nx+1];
-    E=-1;
+    E=-5;
     int count=0;
     int last;
     int now;
@@ -140,8 +141,9 @@ int main()
     }
     for (int i=0;i<task;i++)
     {
-        cout << setprecision(9) <<data_E[i] << endl;;
+        cout << setprecision(9) <<data_E[i] << endl;
     }
-    output((double **)data_PHI,task,Nx+1,"./hw1_1_phi.csv");
+    output((double **)data_PHI,task,Nx+1,"./hw1_4_phi.csv");
     system("pause");
 }
+

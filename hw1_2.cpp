@@ -1,11 +1,28 @@
 /* 
-    第一题代码(C++)
+    第二题代码(C++)
 */
 #include <iostream>
 #include <math.h>
 #include <fstream>
 #include <iomanip>
+
 using namespace std;
+
+int sign(double a)
+{
+    if (a>0)
+    {
+        return 1;
+    }
+    else if (a<0)
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 void output(double **array,int m,int n,string filepath)
 {   
@@ -21,7 +38,7 @@ void output(double **array,int m,int n,string filepath)
     }
 }
 
-double integral(int Nx, double *PHI, double dx)
+ double integral(int Nx, double *PHI, double dx)
 {
      double s=0;
     for (int i=1;i<=Nx-1;i++)
@@ -37,6 +54,10 @@ int numerov(int Nx, double *X, double *PHI, double *V, double E, double dx, doub
     for (int i=0;i<=Nx;i++)
     {
         f[i]=1+(2*(E - V[i]))/12*dx*dx;
+        if (isinf(f[i]))
+        {
+            f[i]=1;
+        }
     }
     PHI[0]=0;
     PHI[1]=0.01;
@@ -45,10 +66,13 @@ int numerov(int Nx, double *X, double *PHI, double *V, double E, double dx, doub
         PHI[i+1]= ((12 - 10*f[i])*PHI[i] - f[i-1]*PHI[i-1])/f[i+1];
     }
      double c=1/pow(integral(Nx,PHI,dx),0.5);
+    //std::cout << c <<std::endl;
     for (int i=0;i<=Nx;i++)
     {
         PHI[i]=PHI[i]*c;
     }
+    std::cout << PHI[Nx] <<std::endl;
+    //Sleep(100);
 
     if (PHI[Nx]>eps)
     {
@@ -64,11 +88,13 @@ int numerov(int Nx, double *X, double *PHI, double *V, double E, double dx, doub
     }
 }
 
-double bi_solve(int Nx, double *X, double *PHI, double *V, double E_low, double E_high, double dx, double eps,int low,int high)
+ double bi_solve(int Nx, double *X, double *PHI, double *V, double E_low, double E_high, double dx, double eps,int low,int high)
 {   
+    std::cout << "b" <<std::endl;
+    std::cout <<"E"<<E_low<<" "<<E_high<<std::endl;
     double E_mid=(E_low+E_high)/2;
     int mid=numerov(Nx,X,PHI,V,E_mid,dx,eps);
-    if (mid==0)
+    if (mid==0 || E_high-E_low<1e-10)
     {
         return E_mid;
     }
@@ -83,12 +109,12 @@ double bi_solve(int Nx, double *X, double *PHI, double *V, double E_low, double 
 }
 
 int main()
-{   
+{
     //parameter
     int Nx=1e4;
      double E;
      double max_step=0.1;
-     double dx=1.0/Nx;
+     double dx=50.0/Nx;//调整被除数调整范围
      double eps=1e-8;
     //init array
      double X[Nx+1];
@@ -97,14 +123,15 @@ int main()
     for (int i=0;i<=Nx;i++)
     {
         X[i]=i*dx;
-        V[i]=0;
+        V[i]=4*(1-1/pow(1-exp(-X[i]/2),0.5));//调整V0
     }
 
+    
     //loop for E
-    int task=3;
+    int task=10;
     double data_E[task];
     double data_PHI[task][Nx+1];
-    E=-1;
+    E=-3;
     int count=0;
     int last;
     int now;
@@ -140,8 +167,8 @@ int main()
     }
     for (int i=0;i<task;i++)
     {
-        cout << setprecision(9) <<data_E[i] << endl;;
+        cout << setprecision(9) << data_E[i] <<  endl;
     }
-    output((double **)data_PHI,task,Nx+1,"./hw1_1_phi.csv");
+    output((double **)data_PHI,task,Nx+1,"./hw1_2_phi_ill.csv");
     system("pause");
 }

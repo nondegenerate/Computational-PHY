@@ -1,11 +1,29 @@
 /* 
-    第一题代码(C++)
+    第三题Numerov代码(C++)
 */
 #include <iostream>
 #include <math.h>
 #include <fstream>
 #include <iomanip>
 using namespace std;
+
+using namespace std;
+
+int sign(double a)
+{
+    if (a>0)
+    {
+        return 1;
+    }
+    else if (a<0)
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 void output(double **array,int m,int n,string filepath)
 {   
@@ -45,6 +63,7 @@ int numerov(int Nx, double *X, double *PHI, double *V, double E, double dx, doub
         PHI[i+1]= ((12 - 10*f[i])*PHI[i] - f[i-1]*PHI[i-1])/f[i+1];
     }
      double c=1/pow(integral(Nx,PHI,dx),0.5);
+    
     for (int i=0;i<=Nx;i++)
     {
         PHI[i]=PHI[i]*c;
@@ -68,7 +87,7 @@ double bi_solve(int Nx, double *X, double *PHI, double *V, double E_low, double 
 {   
     double E_mid=(E_low+E_high)/2;
     int mid=numerov(Nx,X,PHI,V,E_mid,dx,eps);
-    if (mid==0)
+    if (mid==0 || E_high-E_low<1e-10)
     {
         return E_mid;
     }
@@ -83,12 +102,12 @@ double bi_solve(int Nx, double *X, double *PHI, double *V, double E_low, double 
 }
 
 int main()
-{   
+{
     //parameter
-    int Nx=1e4;
+    int Nx=200;
      double E;
      double max_step=0.1;
-     double dx=1.0/Nx;
+     double dx=2.0/Nx;//调整被除数调整范围
      double eps=1e-8;
     //init array
      double X[Nx+1];
@@ -96,12 +115,13 @@ int main()
      double V[Nx+1];
     for (int i=0;i<=Nx;i++)
     {
-        X[i]=i*dx;
-        V[i]=0;
+        X[i]=i*dx-1;
+        V[i]=5*sign(X[i]+0.5)-5*sign(X[i]-0.5);//调整V0
     }
 
+    
     //loop for E
-    int task=3;
+    int task=1;
     double data_E[task];
     double data_PHI[task][Nx+1];
     E=-1;
@@ -140,8 +160,8 @@ int main()
     }
     for (int i=0;i<task;i++)
     {
-        cout << setprecision(9) <<data_E[i] << endl;;
+        cout << setprecision(9) << data_E[i] << endl;
     }
-    output((double **)data_PHI,task,Nx+1,"./hw1_1_phi.csv");
+    output((double **)PHI,task,Nx+1,"./hw1_3_phi.csv");
     system("pause");
 }
